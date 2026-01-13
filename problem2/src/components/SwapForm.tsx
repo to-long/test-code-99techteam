@@ -29,9 +29,8 @@ export function SwapForm() {
     handleSubmit,
     watch,
     setValue,
+    trigger,
     formState: { errors, isValid },
-    setError,
-    clearErrors,
   } = useForm<SwapFormData>({
     defaultValues: { fromAmount: '' },
     mode: 'onChange',
@@ -40,19 +39,12 @@ export function SwapForm() {
 
   const fromAmount = watch('fromAmount');
 
-  // Re-validate when schema dependencies change (balance)
+  // Re-validate when wallet balance changes
   useEffect(() => {
     if (fromAmount) {
-      schema
-        .validate({ fromAmount })
-        .then(() => clearErrors('fromAmount'))
-        .catch((err) => {
-          setError('fromAmount', { type: 'manual', message: err.message });
-        });
-    } else {
-      clearErrors('fromAmount');
+      trigger('fromAmount');
     }
-  }, [walletBalance, fromAmount, schema, setError, clearErrors]);
+  }, [walletBalance, trigger, fromAmount]);
 
   // Derived states
   const hasValidTokens = fromToken && toToken && fromToken.currency !== toToken.currency;
@@ -108,11 +100,6 @@ export function SwapForm() {
     setValue('fromAmount', '');
   };
 
-  const getButtonText = () => {
-    if (isSwapping) return null; // Will show spinner
-    return 'Confirm Swap';
-  };
-
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty, numbers, and decimal point
@@ -128,7 +115,7 @@ export function SwapForm() {
         className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl"
       >
         {/* From Section */}
-        <div className={`bg-black/20 rounded-2xl p-4 mb-2 ${errors.fromAmount ? 'ring-2 ring-red-500/50' : ''}`}>
+        <div className={`bg-black/20 rounded-2xl p-4 mb-2 ${errors.fromAmount ? 'ring-2 ring-amber-500/50' : ''}`}>
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-medium text-white/50 uppercase tracking-wider">You Pay</span>
             <div className="flex items-center gap-2">
@@ -156,14 +143,14 @@ export function SwapForm() {
               value={fromAmount}
               onChange={handleAmountChange}
               className={`flex-1 bg-transparent text-3xl font-semibold text-white placeholder-white/30 focus:outline-none min-w-0 ${
-                errors.fromAmount ? 'text-red-400' : ''
+                errors.fromAmount ? 'text-amber-400' : ''
               }`}
             />
             <TokenSelector tokens={fromTokenOptions} selected={fromToken} onSelect={setFromToken} />
           </div>
           {/* Validation Error */}
           {errors.fromAmount && (
-            <p className="text-xs text-red-400 mt-2">
+            <p className="text-xs text-amber-400 mt-2">
               {errors.fromAmount.message}
             </p>
           )}
@@ -226,8 +213,8 @@ export function SwapForm() {
         <motion.button
           type="submit"
           disabled={isSwapping || !canSubmit}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           className="w-full mt-6 py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-violet-500/30"
         >
           {isSwapping ? (
@@ -240,7 +227,7 @@ export function SwapForm() {
               Swapping...
             </span>
           ) : (
-            getButtonText()
+            'Confirm Swap'
           )}
         </motion.button>
       </form>

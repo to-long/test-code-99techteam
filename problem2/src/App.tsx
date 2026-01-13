@@ -25,8 +25,8 @@ export default function App() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center bg-red-500/20 border border-red-500/50 rounded-xl p-6">
-          <p className="text-red-400 font-medium mb-2">Failed to load exchange rates</p>
+        <div className="text-center bg-amber-500/20 border border-amber-500/50 rounded-xl p-6">
+          <p className="text-amber-400 font-medium mb-2">Failed to load exchange rates</p>
           <p className="text-white/60 text-sm">{error}</p>
           <button
             onClick={() => fetchExchangeRates()}

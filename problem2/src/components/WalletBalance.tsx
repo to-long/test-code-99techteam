@@ -70,7 +70,7 @@ export function WalletBalance() {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl flex flex-col h-[500px]">
+    <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl flex flex-col h-[520px]">
       {/* Header - Fixed */}
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         <div className="flex items-center gap-2">

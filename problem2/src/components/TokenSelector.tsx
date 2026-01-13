@@ -13,7 +13,9 @@ export function TokenSelector({ tokens, selected, onSelect, disabled }: TokenSel
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [imgError, setImgError] = useState<Set<string>>(new Set());
+  const [openUpward, setOpenUpward] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -24,6 +26,16 @@ export function TokenSelector({ tokens, selected, onSelect, disabled }: TokenSel
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Check if dropdown should open upward
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const dropdownHeight = 320; // max-h-64 (256px) + search (64px)
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenUpward(spaceBelow < dropdownHeight);
+    }
+  }, [isOpen]);
 
   const filteredTokens = tokens.filter((t) =>
     t.currency.toLowerCase().includes(search.toLowerCase())
@@ -59,6 +71,7 @@ export function TokenSelector({ tokens, selected, onSelect, disabled }: TokenSel
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -85,11 +98,13 @@ export function TokenSelector({ tokens, selected, onSelect, disabled }: TokenSel
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: openUpward ? 10 : -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: openUpward ? 10 : -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 mt-2 w-64 right-0 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            className={`absolute z-50 w-64 right-0 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ${
+              openUpward ? 'bottom-full mb-2' : 'top-full mt-2'
+            }`}
           >
             <div className="p-3 border-b border-white/10">
               <input
