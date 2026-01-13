@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { tokenIcons, exchangeRates } from '../constants';
+import { useWalletStore } from '../store/useWalletStore';
+import { tokenIcons } from '../constants';
 
 export interface Token {
   currency: string;
@@ -8,10 +9,12 @@ export interface Token {
 }
 
 export function useTokens() {
+  const exchangeRates = useWalletStore((state) => state.exchangeRates);
+
   const tokens = useMemo(() => {
-    // Get unique tokens with their latest prices
+    // Get unique tokens with their prices
     const priceMap = new Map<string, number>();
-    
+
     exchangeRates.forEach((rate) => {
       // Use the first price we encounter for each currency
       if (!priceMap.has(rate.currency)) {
@@ -21,7 +24,7 @@ export function useTokens() {
 
     // Only include tokens that have both an icon and a price
     const tokenList: Token[] = [];
-    
+
     Object.entries(tokenIcons).forEach(([currency, icon]) => {
       const price = priceMap.get(currency);
       if (price !== undefined) {
@@ -31,7 +34,7 @@ export function useTokens() {
 
     // Sort by price (highest first)
     return tokenList.sort((a, b) => b.price - a.price);
-  }, []);
+  }, [exchangeRates]);
 
   return tokens;
 }
