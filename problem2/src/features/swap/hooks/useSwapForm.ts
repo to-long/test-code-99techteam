@@ -37,12 +37,12 @@ export function useSwapForm() {
 
   const fromAmount = watch('fromAmount');
 
-  // Re-validate when wallet balance changes
+  // Re-validate when fromAmount changes (schema already has current walletBalance)
   useEffect(() => {
     if (fromAmount) {
       trigger('fromAmount');
     }
-  }, [walletBalance, trigger, fromAmount]);
+  }, [trigger, fromAmount]);
 
   // Derived states
   const hasValidTokens = fromToken && toToken && fromToken.currency !== toToken.currency;
