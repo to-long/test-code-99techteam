@@ -101,12 +101,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
       // Deduplicate by currency, keeping the most recent entry
       const priceMap = new Map<string, ExchangeRate>();
-      data.forEach((rate) => {
+      for (const rate of data) {
         const existing = priceMap.get(rate.currency);
         if (!existing || new Date(rate.date) > new Date(existing.date)) {
           priceMap.set(rate.currency, rate);
         }
-      });
+      }
 
       const exchangeRates = Array.from(priceMap.values());
 

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { SwapForm } from './components/SwapForm';
 import { WalletBalance } from './components/WalletBalance';
 import { useWalletStore } from './store/useWalletStore';
@@ -31,6 +31,7 @@ export default function App() {
           <button
             onClick={() => fetchExchangeRates()}
             className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors"
+            type="button"
           >
             Retry
           </button>
