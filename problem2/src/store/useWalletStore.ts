@@ -19,12 +19,12 @@ interface WalletState {
   walletTokens: WalletToken[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Getters
   getPrice: (currency: string) => number;
   getBalance: (currency: string) => number;
   getIcon: (currency: string) => string;
-  
+
   // Actions
   fetchExchangeRates: () => Promise<void>;
   updateBalance: (currency: string, amount: number) => void;
@@ -90,15 +90,15 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
   fetchExchangeRates: async () => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const response = await fetch(PRICES_API_URL);
       if (!response.ok) {
         throw new Error(`Failed to fetch prices: ${response.statusText}`);
       }
-      
+
       const data: ExchangeRate[] = await response.json();
-      
+
       // Deduplicate by currency, keeping the most recent entry
       const priceMap = new Map<string, ExchangeRate>();
       data.forEach((rate) => {
@@ -107,29 +107,27 @@ export const useWalletStore = create<WalletState>((set, get) => ({
           priceMap.set(rate.currency, rate);
         }
       });
-      
+
       const exchangeRates = Array.from(priceMap.values());
-      
+
       // Initialize wallet tokens based on available currencies
       const walletTokens: WalletToken[] = exchangeRates.map((rate) => ({
         currency: rate.currency,
         amount: defaultWalletAmounts[rate.currency] ?? Math.floor(Math.random() * 100) + 1,
       }));
-      
+
       set({ exchangeRates, walletTokens, isLoading: false });
     } catch (error) {
-      set({ 
+      set({
         error: error instanceof Error ? error.message : 'Failed to fetch exchange rates',
-        isLoading: false 
+        isLoading: false,
       });
     }
   },
 
   updateBalance: (currency: string, amount: number) => {
     set((state) => ({
-      walletTokens: state.walletTokens.map((t) =>
-        t.currency === currency ? { ...t, amount } : t
-      ),
+      walletTokens: state.walletTokens.map((t) => (t.currency === currency ? { ...t, amount } : t)),
     }));
   },
 

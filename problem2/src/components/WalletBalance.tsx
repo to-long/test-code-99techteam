@@ -75,8 +75,18 @@ export function WalletBalance() {
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+              />
             </svg>
           </div>
           <span className="text-white font-semibold">My Wallet</span>
@@ -120,9 +130,7 @@ export function WalletBalance() {
 
       {/* Footer - Fixed */}
       <div className="p-3 border-t border-white/10">
-        <p className="text-center text-xs text-white/40">
-          {walletTokensDisplay.length} tokens
-        </p>
+        <p className="text-center text-xs text-white/40">{walletTokensDisplay.length} tokens</p>
       </div>
     </div>
   );

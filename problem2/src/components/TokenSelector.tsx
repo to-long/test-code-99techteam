@@ -136,11 +136,21 @@ export function TokenSelector({ tokens, selected, onSelect, disabled }: TokenSel
                     <TokenIcon token={token} size={36} />
                     <div className="text-left flex-1">
                       <div className="font-medium text-white">{token.currency}</div>
-                      <div className="text-xs text-white/50">${token.price.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+                      <div className="text-xs text-white/50">
+                        ${token.price.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                      </div>
                     </div>
                     {selected?.currency === token.currency && (
-                      <svg className="w-5 h-5 text-violet-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5 text-violet-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     )}
                   </button>

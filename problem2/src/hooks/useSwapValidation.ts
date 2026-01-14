@@ -18,12 +18,16 @@ export function useSwapValidation({ walletBalance }: UseSwapValidationParams) {
           const num = Number(value);
           return !isNaN(num) && num > 0;
         })
-        .test('balance', `Insufficient balance (max: ${walletBalance.toLocaleString(undefined, { maximumFractionDigits: 6 })})`, (value) => {
-          if (!value) return true;
-          const num = Number(value);
-          if (isNaN(num)) return true;
-          return num <= walletBalance;
-        }),
+        .test(
+          'balance',
+          `Insufficient balance (max: ${walletBalance.toLocaleString(undefined, { maximumFractionDigits: 6 })})`,
+          (value) => {
+            if (!value) return true;
+            const num = Number(value);
+            if (isNaN(num)) return true;
+            return num <= walletBalance;
+          }
+        ),
     });
   }, [walletBalance]);
 

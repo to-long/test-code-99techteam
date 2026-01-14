@@ -9,16 +9,21 @@
     "problem2": "pnpm --filter fe dev",
     "problem2:build": "pnpm --filter fe build",
     "problem2:serve": "pnpm --filter fe preview",
-    "problem2:test": "pnpm --filter fe test:run",    
+    "problem2:test": "pnpm --filter fe test:run",
 
     "problem3": "ts-node problem3/index.ts",
-    "test:3": "vitest run problem3"
+    "test:3": "vitest run problem3",
+
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check --write ."
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",

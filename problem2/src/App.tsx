@@ -51,9 +51,7 @@ export default function App() {
         >
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-              Token Swap
-            </h1>
+            <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Token Swap</h1>
             <p className="text-white/60">Exchange tokens instantly</p>
           </div>
 

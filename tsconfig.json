@@ -13,12 +13,6 @@
     "declaration": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "problem1/**/*",
-    "problem2/**/*",
-    "problem3/**/*",
-    "problem4/**/*",
-    "problem5/**/*"
-  ],
+  "include": ["problem1/**/*", "problem2/**/*", "problem3/**/*", "problem4/**/*", "problem5/**/*"],
   "exclude": ["node_modules", "dist"]
 }

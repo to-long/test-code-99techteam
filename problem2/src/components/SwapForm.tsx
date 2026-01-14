@@ -91,11 +91,11 @@ export function SwapForm() {
 
     setIsSwapping(true);
     await new Promise((r) => setTimeout(r, 2000));
-    
+
     // Update wallet balances
     deductBalance(fromToken.currency, swapFromAmount);
     addBalance(toToken.currency, swapToAmount);
-    
+
     setIsSwapping(false);
     setValue('fromAmount', '');
   };
@@ -115,9 +115,13 @@ export function SwapForm() {
         className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl"
       >
         {/* From Section */}
-        <div className={`bg-black/20 rounded-2xl p-4 mb-2 ${errors.fromAmount ? 'ring-2 ring-amber-500/50' : ''}`}>
+        <div
+          className={`bg-black/20 rounded-2xl p-4 mb-2 ${errors.fromAmount ? 'ring-2 ring-amber-500/50' : ''}`}
+        >
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-medium text-white/50 uppercase tracking-wider">You Pay</span>
+            <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
+              You Pay
+            </span>
             <div className="flex items-center gap-2">
               {fromToken && (
                 <button
@@ -130,7 +134,10 @@ export function SwapForm() {
               )}
               {fromToken && fromAmount && !isNaN(Number(fromAmount)) && (
                 <span className="text-xs text-white/50">
-                  ≈ ${(Number(fromAmount) * fromToken.price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  ≈ $
+                  {(Number(fromAmount) * fromToken.price).toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               )}
             </div>
@@ -150,9 +157,7 @@ export function SwapForm() {
           </div>
           {/* Validation Error */}
           {errors.fromAmount && (
-            <p className="text-xs text-amber-400 mt-2">
-              {errors.fromAmount.message}
-            </p>
+            <p className="text-xs text-amber-400 mt-2">{errors.fromAmount.message}</p>
           )}
         </div>
 
@@ -165,8 +170,18 @@ export function SwapForm() {
             whileTap={{ scale: 0.9 }}
             className="w-12 h-12 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30 border-2 border-slate-900/50"
           >
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+              />
             </svg>
           </motion.button>
         </div>
@@ -174,10 +189,15 @@ export function SwapForm() {
         {/* To Section */}
         <div className="bg-black/20 rounded-2xl p-4 mt-2">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-medium text-white/50 uppercase tracking-wider">You Receive</span>
+            <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
+              You Receive
+            </span>
             {toToken && toAmount && (
               <span className="text-xs text-white/50">
-                ≈ ${(Number(toAmount) * toToken.price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                ≈ $
+                {(Number(toAmount) * toToken.price).toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}
               </span>
             )}
           </div>
@@ -203,7 +223,9 @@ export function SwapForm() {
             <div className="flex justify-between items-center text-sm">
               <span className="text-white/50">Rate</span>
               <span className="text-white font-medium">
-                1 {fromToken.currency} = {exchangeRate.toLocaleString(undefined, { maximumFractionDigits: 6 })} {toToken.currency}
+                1 {fromToken.currency} ={' '}
+                {exchangeRate.toLocaleString(undefined, { maximumFractionDigits: 6 })}{' '}
+                {toToken.currency}
               </span>
             </div>
           </motion.div>
