@@ -16,7 +16,7 @@ export function useSwapValidation({ walletBalance }: UseSwapValidationParams) {
         .test('positive', 'Amount must be greater than 0', (value) => {
           if (!value) return false;
           const num = Number(value);
-          return !isNaN(num) && num > 0;
+          return !Number.isNaN(num) && num > 0;
         })
         .test(
           'balance',
@@ -24,7 +24,7 @@ export function useSwapValidation({ walletBalance }: UseSwapValidationParams) {
           (value) => {
             if (!value) return true;
             const num = Number(value);
-            if (isNaN(num)) return true;
+            if (Number.isNaN(num)) return true;
             return num <= walletBalance;
           }
         ),

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { tokenIcons } from '../constants';
+import { tokenIcons } from '../../../shared/constants';
 
 const PRICES_API_URL = 'https://interview.switcheo.com/prices.json';
 

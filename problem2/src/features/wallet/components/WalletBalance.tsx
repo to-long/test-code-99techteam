@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { tokenIcons } from '../constants';
+import { tokenIcons } from '../../../shared/constants';
 import { useWalletStore } from '../store/useWalletStore';
 
 interface WalletTokenDisplay {
