@@ -9,8 +9,8 @@ export interface SwapFormData {
 }
 
 // Create schema based on walletBalance
-export function createSchema(walletBalance: number): yup.ObjectSchema<SwapFormData> {
-  return yup.object({
+export function createSchema(walletBalance: number) {
+  return yup.object<SwapFormData>({
     fromToken: yup
       .mixed<Token>()
       .nullable()
@@ -28,6 +28,15 @@ export function createSchema(walletBalance: number): yup.ObjectSchema<SwapFormDa
       }),
     fromAmount: yup
       .string()
+      .test('required-from-token', 'Please select a token to swap from', function (value) {
+        // If value exists, fromToken must be selected
+        if (value && value.trim() !== '') {
+          const { fromToken } = this.parent;
+          return fromToken !== null;
+        }
+        // If value is empty, let the required test handle it
+        return true;
+      })
       .required('Please enter an amount')
       .matches(/^\d*\.?\d*$/, 'Invalid amount format')
       .test('positive', 'Amount must be greater than 0', (value) => {

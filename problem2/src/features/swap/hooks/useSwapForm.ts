@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useForm, useFormState } from 'react-hook-form';
 import * as yup from 'yup';
-import { formatEuropeanNumber } from '../../../shared/utils/formatNumber';
 import { useWalletStore } from '../../wallet';
 import { type SwapFormData, createSchema } from './useSchema';
 import { useTokens } from './useTokens';
@@ -37,39 +36,17 @@ export function useSwapForm() {
     };
   }, [getBalance]);
 
-  const { handleSubmit, control, watch, setValue, reset } = useForm<SwapFormData>({
+  const { handleSubmit, control, setValue, reset, getValues } = useForm<SwapFormData>({
     defaultValues: { fromAmount: '', fromToken: null, toToken: null },
     mode: 'onChange',
     resolver,
+    criteriaMode: 'all',
   });
 
   const { errors, isValid } = useFormState({ control });
-  const { fromToken, toToken, fromAmount } = watch();
 
-  // Get wallet balance
-  const walletBalance = fromToken ? getBalance(fromToken.currency) : 0;
-
-  // Calculate derived values
-  const toAmount = useMemo(() => {
-    if (!fromToken || !toToken || !fromAmount || Number.isNaN(Number(fromAmount))) return '';
-    const rate = fromToken.price / toToken.price;
-    return (Number(fromAmount) * rate).toFixed(6);
-  }, [fromToken, toToken, fromAmount]);
-
-  const exchangeRate = useMemo(() => {
-    if (!fromToken || !toToken) return null;
-    return fromToken.price / toToken.price;
-  }, [fromToken, toToken]);
-
-  const fromTokenOptions = useMemo(() => {
-    if (!toToken) return tokens;
-    return tokens.filter((t) => t.currency !== toToken.currency);
-  }, [tokens, toToken]);
-
-  const toTokenOptions = useMemo(() => {
-    if (!fromToken) return tokens;
-    return tokens.filter((t) => t.currency !== fromToken.currency);
-  }, [tokens, fromToken]);
+  const fromTokenOptions = useMemo(() => tokens, [tokens]);
+  const toTokenOptions = useMemo(() => tokens, [tokens]);
 
   const onSubmit = async (data: SwapFormData) => {
     if (!isValid || !data.fromToken || !data.toToken) return;
@@ -93,12 +70,6 @@ export function useSwapForm() {
   return {
     control,
     tokens,
-    fromToken,
-    toToken,
-    fromAmount,
-    toAmount: formatEuropeanNumber(toAmount),
-    walletBalance,
-    exchangeRate,
     fromTokenOptions,
     toTokenOptions,
     errors,
@@ -107,5 +78,7 @@ export function useSwapForm() {
     handleSubmit,
     onSubmit,
     setValue,
+    getValues,
+    getBalance,
   };
 }
