@@ -1,54 +1,55 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { formatEuropeanNumber, parseEuropeanNumber } from '../../../shared/utils/formatNumber';
+import { useMemo, useState } from 'react';
+import { useForm, useFormState } from 'react-hook-form';
+import * as yup from 'yup';
+import { formatEuropeanNumber } from '../../../shared/utils/formatNumber';
 import { useWalletStore } from '../../wallet';
-import { useSwapValidation } from './useSwapValidation';
-import { type Token, useTokens } from './useTokens';
-
-interface SwapFormData {
-  fromAmount: string;
-}
+import { type SwapFormData, createSchema } from './useSchema';
+import { useTokens } from './useTokens';
 
 export function useSwapForm() {
   const tokens = useTokens();
-  const [fromToken, setFromToken] = useState<Token | null>(null);
-  const [toToken, setToToken] = useState<Token | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
-
   const { deductBalance, addBalance, getBalance } = useWalletStore();
 
-  // Get wallet balance for selected token
-  const walletBalance = fromToken ? getBalance(fromToken.currency) : 0;
+  // Create resolver that dynamically gets walletBalance
+  const resolver = useMemo(() => {
+    return async (values: SwapFormData) => {
+      const walletBalance = values.fromToken ? getBalance(values.fromToken.currency) : 0;
+      const schema = createSchema(walletBalance);
+      try {
+        const validated = await schema.validate(values, { abortEarly: false });
+        return { values: validated, errors: {} };
+      } catch (error) {
+        if (error instanceof yup.ValidationError) {
+          const errors: Record<string, { type: string; message: string }> = {};
+          for (const err of error.inner) {
+            if (err.path) {
+              errors[err.path] = {
+                type: err.type || 'validation',
+                message: err.message,
+              };
+            }
+          }
+          return { values: {}, errors };
+        }
+        return { values: {}, errors: {} };
+      }
+    };
+  }, [getBalance]);
 
-  // Get validation schema
-  const { schema } = useSwapValidation({ walletBalance });
-
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    trigger,
-    formState: { errors, isValid },
-  } = useForm<SwapFormData>({
-    defaultValues: { fromAmount: '' },
+  const { handleSubmit, control, watch, setValue, reset } = useForm<SwapFormData>({
+    defaultValues: { fromAmount: '', fromToken: null, toToken: null },
     mode: 'onChange',
-    resolver: yupResolver(schema),
+    resolver,
   });
 
-  const fromAmount = watch('fromAmount');
+  const { errors, isValid } = useFormState({ control });
+  const { fromToken, toToken, fromAmount } = watch();
 
-  // Re-validate when fromAmount changes (schema already has current walletBalance)
-  useEffect(() => {
-    if (fromAmount) {
-      trigger('fromAmount');
-    }
-  }, [trigger, fromAmount]);
+  // Get wallet balance
+  const walletBalance = fromToken ? getBalance(fromToken.currency) : 0;
 
-  // Derived states
-  const hasValidTokens = fromToken && toToken && fromToken.currency !== toToken.currency;
-  const canSubmit = isValid && hasValidTokens;
-
+  // Calculate derived values
   const toAmount = useMemo(() => {
     if (!fromToken || !toToken || !fromAmount || Number.isNaN(Number(fromAmount))) return '';
     const rate = fromToken.price / toToken.price;
@@ -70,88 +71,41 @@ export function useSwapForm() {
     return tokens.filter((t) => t.currency !== fromToken.currency);
   }, [tokens, fromToken]);
 
-  const handleSwapTokens = () => {
-    const temp = fromToken;
-    setFromToken(toToken);
-    setToToken(temp);
-  };
-
-  const handleSetMax = () => {
-    if (fromToken && walletBalance > 0) {
-      setValue('fromAmount', walletBalance.toString());
-    }
-  };
-
   const onSubmit = async (data: SwapFormData) => {
-    if (!canSubmit || !fromToken || !toToken) return;
+    if (!isValid || !data.fromToken || !data.toToken) return;
 
     const swapFromAmount = Number(data.fromAmount);
-    const swapToAmount = Number(toAmount);
+    const calculatedToAmount =
+      data.fromToken && data.toToken && data.fromAmount
+        ? (Number(data.fromAmount) * (data.fromToken.price / data.toToken.price)).toFixed(6)
+        : '0';
 
     setIsSwapping(true);
     await new Promise((r) => setTimeout(r, 2000));
 
-    // Update wallet balances
-    deductBalance(fromToken.currency, swapFromAmount);
-    addBalance(toToken.currency, swapToAmount);
+    deductBalance(data.fromToken.currency, swapFromAmount);
+    addBalance(data.toToken.currency, Number(calculatedToAmount));
 
     setIsSwapping(false);
-    setValue('fromAmount', '');
+    reset({ fromAmount: '', fromToken: data.fromToken, toToken: data.toToken });
   };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow empty, numbers, dots (thousands), and comma (decimal separator)
-    if (value === '' || /^[\d.,]*$/.test(value)) {
-      // Parse European format to standard format (dot as decimal)
-      const parsedValue = parseEuropeanNumber(value);
-      // Validate it's a valid number format
-      if (parsedValue === '' || /^\d*\.?\d*$/.test(parsedValue)) {
-        setValue('fromAmount', parsedValue);
-      }
-    }
-  };
-
-  // Format fromAmount for display (European format)
-  const formattedFromAmount = useMemo(() => {
-    if (!fromAmount) return '';
-    return formatEuropeanNumber(fromAmount);
-  }, [fromAmount]);
-
-  // Format toAmount for display (European format)
-  const formattedToAmount = useMemo(() => {
-    if (!toAmount) return '';
-    return formatEuropeanNumber(toAmount);
-  }, [toAmount]);
 
   return {
-    // Tokens
+    control,
     tokens,
     fromToken,
     toToken,
-    setFromToken,
-    setToToken,
-    fromTokenOptions,
-    toTokenOptions,
-
-    // Amounts
     fromAmount,
-    formattedFromAmount,
-    toAmount,
-    formattedToAmount,
+    toAmount: formatEuropeanNumber(toAmount),
     walletBalance,
     exchangeRate,
-
-    // Form state
+    fromTokenOptions,
+    toTokenOptions,
     errors,
     isSwapping,
-    canSubmit,
-
-    // Handlers
+    canSubmit: isValid,
     handleSubmit,
-    handleSwapTokens,
-    handleSetMax,
-    handleAmountChange,
     onSubmit,
+    setValue,
   };
 }

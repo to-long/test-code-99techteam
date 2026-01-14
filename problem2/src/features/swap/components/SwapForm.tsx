@@ -1,30 +1,27 @@
 import { motion } from 'framer-motion';
+import { Controller } from 'react-hook-form';
+import { formatEuropeanNumber, parseEuropeanNumber } from '../../../shared/utils/formatNumber';
 import { useSwapForm } from '../hooks/useSwapForm';
 import { TokenSelector } from './TokenSelector';
 
 export function SwapForm() {
   const {
+    control,
     tokens,
     fromToken,
     toToken,
-    setFromToken,
-    setToToken,
-    fromTokenOptions,
-    toTokenOptions,
     fromAmount,
-    formattedFromAmount,
     toAmount,
-    formattedToAmount,
     walletBalance,
     exchangeRate,
+    fromTokenOptions,
+    toTokenOptions,
     errors,
     isSwapping,
     canSubmit,
     handleSubmit,
-    handleSwapTokens,
-    handleSetMax,
-    handleAmountChange,
     onSubmit,
+    setValue,
   } = useSwapForm();
 
   return (
@@ -45,7 +42,11 @@ export function SwapForm() {
               {fromToken && (
                 <button
                   type="button"
-                  onClick={handleSetMax}
+                  onClick={() => {
+                    if (walletBalance > 0) {
+                      setValue('fromAmount', walletBalance.toString());
+                    }
+                  }}
                   className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
                 >
                   Balance: {walletBalance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
@@ -62,21 +63,49 @@ export function SwapForm() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="0,00"
-              value={formattedFromAmount}
-              onChange={handleAmountChange}
-              className={`flex-1 bg-transparent text-3xl font-semibold text-white placeholder-white/30 focus:outline-none min-w-0 ${
-                errors.fromAmount ? 'text-amber-400' : ''
-              }`}
+            <Controller
+              control={control}
+              name="fromAmount"
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  value={field.value ? formatEuropeanNumber(field.value) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || /^[\d.,]*$/.test(value)) {
+                      const parsed = parseEuropeanNumber(value);
+                      if (parsed === '' || /^\d*\.?\d*$/.test(parsed)) {
+                        field.onChange(parsed);
+                      }
+                    }
+                  }}
+                  className={`flex-1 bg-transparent text-3xl font-semibold text-white placeholder-white/30 focus:outline-none min-w-0 ${
+                    errors.fromAmount ? 'text-amber-400' : ''
+                  }`}
+                />
+              )}
             />
-            <TokenSelector tokens={fromTokenOptions} selected={fromToken} onSelect={setFromToken} />
+            <Controller
+              control={control}
+              name="fromToken"
+              render={({ field }) => (
+                <TokenSelector
+                  tokens={fromTokenOptions}
+                  selected={field.value}
+                  onSelect={field.onChange}
+                />
+              )}
+            />
           </div>
-          {/* Validation Error */}
+          {/* Validation Errors */}
           {errors.fromAmount && (
             <p className="text-xs text-amber-400 mt-2">{errors.fromAmount.message}</p>
+          )}
+          {errors.fromToken && (
+            <p className="text-xs text-amber-400 mt-2">{errors.fromToken.message}</p>
           )}
         </div>
 
@@ -84,7 +113,10 @@ export function SwapForm() {
         <div className="flex justify-center -my-4 relative z-10">
           <motion.button
             type="button"
-            onClick={handleSwapTokens}
+            onClick={() => {
+              setValue('fromToken', toToken, { shouldValidate: true });
+              setValue('toToken', fromToken, { shouldValidate: true });
+            }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="w-12 h-12 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30 border-2 border-slate-900/30"
@@ -125,12 +157,26 @@ export function SwapForm() {
             <input
               type="text"
               placeholder="0,00"
-              value={formattedToAmount}
+              value={toAmount}
               readOnly
               className="flex-1 bg-transparent text-3xl font-semibold text-white placeholder-white/30 focus:outline-none cursor-default min-w-0"
             />
-            <TokenSelector tokens={toTokenOptions} selected={toToken} onSelect={setToToken} />
+            <Controller
+              control={control}
+              name="toToken"
+              render={({ field }) => (
+                <TokenSelector
+                  tokens={toTokenOptions}
+                  selected={field.value}
+                  onSelect={field.onChange}
+                />
+              )}
+            />
           </div>
+          {/* Validation Error */}
+          {errors.toToken && (
+            <p className="text-xs text-amber-400 mt-2">{errors.toToken.message}</p>
+          )}
         </div>
 
         {/* Exchange Rate */}
